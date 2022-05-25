@@ -46,7 +46,7 @@ from gnuradio import qtgui
 
 class loopback_codec2(gr.top_block, Qt.QWidget):
 
-    # Avaialable bit rates: 3200, 2400, 1600, 1400, 1300, 1200, 700 and 450 bps
+    # Avaialable bit rates: 3200, 2400, 1600, 1400, 1300, 1200 bps
     # Sample rate needs to be a multiple of 8000 sps
     # mode can be either 'e' or 'd'
 
@@ -87,8 +87,51 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
         self.mode = mode
         self.scale = scale = 2**13
         self.samp_rate = samp_rate
+        if samp_rate % 8000 != 0: 
+            print("samp_rate is not a multiple of 8000. Audacity can be used to resample the audio file.")
+            exit()
         self.bit_rate = bit_rate
+        self.buf_size = 0
         self.play_encoded = play_encoded = True
+
+        # Description of CODEC2 Vocoder Codec2 encoder:
+        #   /*!
+        # * \brief CODEC2 Vocoder Encoder
+        # * \ingroup audio_blk
+        # *
+        # * Input: Speech (audio) signal as 16-bit shorts, sampling rate 8 kHz.
+        # *
+        # * Output: Vector of unpacked bits, forming one Codec2 frame, per 160
+        # *         input samples (in 2400 and 3200 bps modes) or per 320 input
+        # *         samples (in 1200, 1300, 1400 and 1600 bps modes).
+        # *
+        # */
+        # Taken from: https://www.gnuradio.org/doc/doxygen/codec2__encode__sp_8h_source.html
+        # Consequently the following buffer sizes are used in converting between the output and the bit stream:
+        match bit_rate:
+            case 3200:
+                self.bit_rate_mode = codec2.MODE_3200
+                self.buf_size = 64
+            case 2400:
+                self.bit_rate_mode = codec2.MODE_2400
+                self.buf_size = 48
+            case 1600:
+                self.bit_rate_mode = codec2.MODE_1600
+                self.buf_size = 64
+            case 1400:
+                self.bit_rate_mode = codec2.MODE_1400
+                self.buf_size = 56
+            case 1300:
+                self.bit_rate_mode = codec2.MODE_1300
+                self.buf_size = 52
+            case 1200:
+                self.bit_rate_mode = codec2.MODE_1200
+                self.buf_size = 48
+            case _:
+                print('bit_rate value is missing or not supported.')
+                exit()
+            
+
 
         ##################################################
         # Blocks
@@ -100,16 +143,16 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
         self._play_encoded_callback(self.play_encoded)
         _play_encoded_check_box.stateChanged.connect(lambda i: self.set_play_encoded(self._play_encoded_choices[bool(i)]))
         self.top_layout.addWidget(_play_encoded_check_box)
-        self.vocoder_codec2_encode_sp_0 = vocoder.codec2_encode_sp(codec2.MODE_3200) # bit_rate
-        self.vocoder_codec2_decode_ps_0 = vocoder.codec2_decode_ps(codec2.MODE_3200)
+        self.vocoder_codec2_encode_sp_0 = vocoder.codec2_encode_sp(self.bit_rate_mode) # bit_rate
+        self.vocoder_codec2_decode_ps_0 = vocoder.codec2_decode_ps(self.bit_rate_mode)
         self.rational_resampler_xxx_1 = filter.rational_resampler_fff(
-                interpolation=6,
+                interpolation=int(self.samp_rate/8000),
                 decimation=1,
                 taps=[],
                 fractional_bw=0.4)
         self.rational_resampler_xxx_0 = filter.rational_resampler_fff(
                 interpolation=1,
-                decimation=6,
+                decimation=int(self.samp_rate/8000),
                 taps=[],
                 fractional_bw=0.4)
         # self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
@@ -298,7 +341,7 @@ def main(argv, top_block_cls=loopback_codec2, options=None):
             sys.exit(2)
         tb = top_block_cls('e', audio_file=arg, samp_rate=int(args[0]), bit_rate=int(args[1]))
 
-    #'people-call-me-steve_Au48k.wav' #C:\\Users\\khora\\OneDrive\\Documents\\ABsat_codec2\\
+    #'people-call-me-steve_Au48k.wav'
 
     tb.start()
 

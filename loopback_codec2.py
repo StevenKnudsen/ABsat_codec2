@@ -32,7 +32,7 @@ from gnuradio import blocks
 from gnuradio import filter
 from gnuradio import gr
 from gnuradio.fft import window
-import sys
+import sys, getopt
 import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
@@ -46,7 +46,11 @@ from gnuradio import qtgui
 
 class loopback_codec2(gr.top_block, Qt.QWidget):
 
-    def __init__(self):
+    # Avaialable bit rates: 3200, 2400, 1600, 1400, 1300, 1200, 700 and 450 bps
+    # Sample rate needs to be a multiple of 8000 sps
+    # mode can be either 'e' or 'd'
+
+    def __init__(self, mode, audio_file="people_call_me_steve_Au48k.wav", samp_rate=48000, bit_rate=2400): 
         gr.top_block.__init__(self, "Codec2 Looback Test", catch_exceptions=True)
         Qt.QWidget.__init__(self)
         self.setWindowTitle("Codec2 Looback Test")
@@ -80,8 +84,10 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
+        self.mode = mode
         self.scale = scale = 2**13
-        self.samp_rate = samp_rate = 48000
+        self.samp_rate = samp_rate
+        self.bit_rate = bit_rate
         self.play_encoded = play_encoded = True
 
         ##################################################
@@ -94,8 +100,8 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
         self._play_encoded_callback(self.play_encoded)
         _play_encoded_check_box.stateChanged.connect(lambda i: self.set_play_encoded(self._play_encoded_choices[bool(i)]))
         self.top_layout.addWidget(_play_encoded_check_box)
-        self.vocoder_codec2_encode_sp_0 = vocoder.codec2_encode_sp(codec2.MODE_2400)
-        self.vocoder_codec2_decode_ps_0 = vocoder.codec2_decode_ps(codec2.MODE_2400)
+        self.vocoder_codec2_encode_sp_0 = vocoder.codec2_encode_sp(codec2.MODE_3200) # bit_rate
+        self.vocoder_codec2_decode_ps_0 = vocoder.codec2_decode_ps(codec2.MODE_3200)
         self.rational_resampler_xxx_1 = filter.rational_resampler_fff(
                 interpolation=6,
                 decimation=1,
@@ -106,73 +112,25 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
                 decimation=6,
                 taps=[],
                 fractional_bw=0.4)
-        self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
-            1024, #size
-            8000, #samp_rate
-            'Audio Pre-Encoding', #name
-            1, #number of inputs
-            None # parent
-        )
-        self.qtgui_time_sink_x_0_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0_0.set_y_axis(-1, 1)
+        # self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
+        #     1024, #size
+        #     8000, #samp_rate
+        #     'Audio Pre-Encoding', #name
+        #     1, #number of inputs
+        #     None # parent
+        # )
+        # self.qtgui_time_sink_x_0_0.set_update_time(0.10)
+        # self.qtgui_time_sink_x_0_0.set_y_axis(-1, 1)
 
-        self.qtgui_time_sink_x_0_0.set_y_label('Amplitude', "")
+        # self.qtgui_time_sink_x_0_0.set_y_label('Amplitude', "")
 
-        self.qtgui_time_sink_x_0_0.enable_tags(True)
-        self.qtgui_time_sink_x_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_0_0.enable_autoscale(False)
-        self.qtgui_time_sink_x_0_0.enable_grid(False)
-        self.qtgui_time_sink_x_0_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0_0.enable_control_panel(False)
-        self.qtgui_time_sink_x_0_0.enable_stem_plot(False)
-
-
-        labels = ['', '', '', '', '',
-            '', '', '', '', '']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_time_sink_x_0_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_time_sink_x_0_0.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_0_0.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_0_0.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_0_0.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_0_0.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_0_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_win)
-        self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
-            1024, #size
-            8000, #samp_rate
-            'Audio Post-Encoding', #name
-            1, #number of inputs
-            None # parent
-        )
-        self.qtgui_time_sink_x_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
-
-        self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_0.enable_tags(True)
-        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_0.enable_autoscale(False)
-        self.qtgui_time_sink_x_0.enable_grid(False)
-        self.qtgui_time_sink_x_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0.enable_control_panel(False)
-        self.qtgui_time_sink_x_0.enable_stem_plot(False)
+        # self.qtgui_time_sink_x_0_0.enable_tags(True)
+        # self.qtgui_time_sink_x_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        # self.qtgui_time_sink_x_0_0.enable_autoscale(False)
+        # self.qtgui_time_sink_x_0_0.enable_grid(False)
+        # self.qtgui_time_sink_x_0_0.enable_axis_labels(True)
+        # self.qtgui_time_sink_x_0_0.enable_control_panel(False)
+        # self.qtgui_time_sink_x_0_0.enable_stem_plot(False)
 
 
         labels = ['', '', '', '', '',
@@ -189,30 +147,78 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
             -1, -1, -1, -1, -1]
 
 
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_time_sink_x_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
+        # for i in range(1):
+        #     if len(labels[i]) == 0:
+        #         self.qtgui_time_sink_x_0_0.set_line_label(i, "Data {0}".format(i))
+        #     else:
+        #         self.qtgui_time_sink_x_0_0.set_line_label(i, labels[i])
+        #     self.qtgui_time_sink_x_0_0.set_line_width(i, widths[i])
+        #     self.qtgui_time_sink_x_0_0.set_line_color(i, colors[i])
+        #     self.qtgui_time_sink_x_0_0.set_line_style(i, styles[i])
+        #     self.qtgui_time_sink_x_0_0.set_line_marker(i, markers[i])
+        #     self.qtgui_time_sink_x_0_0.set_line_alpha(i, alphas[i])
 
-        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
-        self.blocks_wavfile_source_0 = blocks.wavfile_source('C:\\Users\\khora\\OneDrive\\Documents\\ABsat_codec2\\people-call-me-steve.wav', True)
-        self.blocks_vector_to_stream_0 = blocks.vector_to_stream(gr.sizeof_char*1, 48)
+        # self._qtgui_time_sink_x_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0.qwidget(), Qt.QWidget)
+        # self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_win)
+        # self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
+        #     1024, #size
+        #     8000, #samp_rate
+        #     'Audio Post-Encoding', #name
+        #     1, #number of inputs
+        #     None # parent
+        # )
+        # self.qtgui_time_sink_x_0.set_update_time(0.10)
+        # self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
+
+        # self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
+
+        # self.qtgui_time_sink_x_0.enable_tags(True)
+        # self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        # self.qtgui_time_sink_x_0.enable_autoscale(False)
+        # self.qtgui_time_sink_x_0.enable_grid(False)
+        # self.qtgui_time_sink_x_0.enable_axis_labels(True)
+        # self.qtgui_time_sink_x_0.enable_control_panel(False)
+        # self.qtgui_time_sink_x_0.enable_stem_plot(False)
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        # for i in range(1):
+        #     if len(labels[i]) == 0:
+        #         self.qtgui_time_sink_x_0.set_line_label(i, "Data {0}".format(i))
+        #     else:
+        #         self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
+        #     self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
+        #     self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
+        #     self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
+        #     self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
+        #     self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
+
+        # self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
+        # self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
+        self.blocks_wavfile_source_0 = blocks.wavfile_source(audio_file, True) # inputing file for being encoded
+        self.blocks_vector_to_stream_0 = blocks.vector_to_stream(gr.sizeof_char*1, int(samp_rate/1000))
         self.blocks_unpacked_to_packed_xx_0 = blocks.unpacked_to_packed_bb(1, gr.GR_LSB_FIRST)
-        self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_char*1, 48)
+        self.blocks_stream_to_vector_0 = blocks.stream_to_vector(gr.sizeof_char*1, int(samp_rate/1000))
         self.blocks_short_to_float_0 = blocks.short_to_float(1, scale)
         self.blocks_packed_to_unpacked_xx_0 = blocks.packed_to_unpacked_bb(1, gr.GR_LSB_FIRST)
         self.blocks_multiply_const_vxx_1 = blocks.multiply_const_ff(1.0 if play_encoded  else 0.0)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_ff(0.0 if play_encoded  else 1.0)
         self.blocks_float_to_short_0 = blocks.float_to_short(1, scale)
         self.blocks_add_xx_0 = blocks.add_vff(1)
-        self.audio_sink_0 = audio.sink(48000, '', True)
+        self.audio_sink_0 = audio.sink(samp_rate, '', True)
 
 
 
@@ -225,14 +231,14 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_multiply_const_vxx_1, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.blocks_packed_to_unpacked_xx_0, 0), (self.blocks_stream_to_vector_0, 0))
         self.connect((self.blocks_short_to_float_0, 0), (self.blocks_multiply_const_vxx_1, 0))
-        self.connect((self.blocks_short_to_float_0, 0), (self.qtgui_time_sink_x_0, 0))
+        #self.connect((self.blocks_short_to_float_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.blocks_stream_to_vector_0, 0), (self.vocoder_codec2_decode_ps_0, 0))
         self.connect((self.blocks_unpacked_to_packed_xx_0, 0), (self.blocks_packed_to_unpacked_xx_0, 0))
         self.connect((self.blocks_vector_to_stream_0, 0), (self.blocks_unpacked_to_packed_xx_0, 0))
         self.connect((self.blocks_wavfile_source_0, 0), (self.rational_resampler_xxx_0, 0))
         self.connect((self.rational_resampler_xxx_0, 0), (self.blocks_float_to_short_0, 0))
         self.connect((self.rational_resampler_xxx_0, 0), (self.blocks_multiply_const_vxx_0, 0))
-        self.connect((self.rational_resampler_xxx_0, 0), (self.qtgui_time_sink_x_0_0, 0))
+        #self.connect((self.rational_resampler_xxx_0, 0), (self.qtgui_time_sink_x_0_0, 0))
         self.connect((self.rational_resampler_xxx_1, 0), (self.audio_sink_0, 0))
         self.connect((self.vocoder_codec2_decode_ps_0, 0), (self.blocks_short_to_float_0, 0))
         self.connect((self.vocoder_codec2_encode_sp_0, 0), (self.blocks_vector_to_stream_0, 0))
@@ -272,14 +278,27 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
 
 
 
-def main(top_block_cls=loopback_codec2, options=None):
+def main(argv, top_block_cls=loopback_codec2, options=None):
 
     if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
         style = gr.prefs().get_string('qtgui', 'style', 'raster')
         Qt.QApplication.setGraphicsSystem(style)
     qapp = Qt.QApplication(sys.argv)
+    inputfile = ''
+    outputfile = ''
+    try:
+        opts, args = getopt.getopt(argv,"he:d:",["efile=","dfile="])
+    except getopt.GetoptError:
+        print('codec2.py [-i <rawaudiofile> samp_rate bit_rate] OR [-d <encodedfile> bit_rate]')
+        sys.exit(2)
+    opt, arg = opts[0]
+    if opt == '-e':
+        if not arg.endswith(".wav"):
+            print('codec2.py [-i <rawaudiofile> samp_rate bit_rate] OR [-d <encodedfile> bit_rate]')
+            sys.exit(2)
+        tb = top_block_cls('e', audio_file=arg, samp_rate=int(args[0]), bit_rate=int(args[1]))
 
-    tb = top_block_cls()
+    #'people-call-me-steve_Au48k.wav' #C:\\Users\\khora\\OneDrive\\Documents\\ABsat_codec2\\
 
     tb.start()
 
@@ -301,4 +320,4 @@ def main(top_block_cls=loopback_codec2, options=None):
     qapp.exec_()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

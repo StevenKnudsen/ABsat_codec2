@@ -44,7 +44,7 @@ from gnuradio.vocoder import codec2
 
 from gnuradio import qtgui
 
-class loopback_codec2(gr.top_block, Qt.QWidget):
+class loopback_codec2(gr.top_block):
 
     # Avaialable bit rates: 3200, 2400, 1600, 1400, 1300, 1200 bps
     # Sample rate needs to be a multiple of 8000 sps
@@ -52,34 +52,34 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
 
     def __init__(self, mode, audio_file="people_call_me_steve_Au48k.wav", samp_rate=48000, bit_rate=2400, output_filename='sample_output'): 
         gr.top_block.__init__(self, "Codec2 Looback Test", catch_exceptions=True)
-        Qt.QWidget.__init__(self)
-        self.setWindowTitle("Codec2 Looback Test")
-        qtgui.util.check_set_qss()
-        try:
-            self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
-        except:
-            pass
-        self.top_scroll_layout = Qt.QVBoxLayout()
-        self.setLayout(self.top_scroll_layout)
-        self.top_scroll = Qt.QScrollArea()
-        self.top_scroll.setFrameStyle(Qt.QFrame.NoFrame)
-        self.top_scroll_layout.addWidget(self.top_scroll)
-        self.top_scroll.setWidgetResizable(True)
-        self.top_widget = Qt.QWidget()
-        self.top_scroll.setWidget(self.top_widget)
-        self.top_layout = Qt.QVBoxLayout(self.top_widget)
-        self.top_grid_layout = Qt.QGridLayout()
-        self.top_layout.addLayout(self.top_grid_layout)
+        # Qt.QWidget.__init__(self)
+        # self.setWindowTitle("Codec2 Looback Test")
+        # qtgui.util.check_set_qss()
+        # try:
+        #     self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
+        # except:
+        #     pass
+        # self.top_scroll_layout = Qt.QVBoxLayout()
+        # self.setLayout(self.top_scroll_layout)
+        # self.top_scroll = Qt.QScrollArea()
+        # self.top_scroll.setFrameStyle(Qt.QFrame.NoFrame)
+        # self.top_scroll_layout.addWidget(self.top_scroll)
+        # self.top_scroll.setWidgetResizable(True)
+        # self.top_widget = Qt.QWidget()
+        # self.top_scroll.setWidget(self.top_widget)
+        # self.top_layout = Qt.QVBoxLayout(self.top_widget)
+        # self.top_grid_layout = Qt.QGridLayout()
+        # self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("GNU Radio", "loopback_codec2")
+        # self.settings = Qt.QSettings("GNU Radio", "loopback_codec2")
 
-        try:
-            if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
-                self.restoreGeometry(self.settings.value("geometry").toByteArray())
-            else:
-                self.restoreGeometry(self.settings.value("geometry"))
-        except:
-            pass
+        # try:
+        #     if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+        #         self.restoreGeometry(self.settings.value("geometry").toByteArray())
+        #     else:
+        #         self.restoreGeometry(self.settings.value("geometry"))
+        # except:
+        #     pass
 
         ##################################################
         # Variables
@@ -208,8 +208,8 @@ class loopback_codec2(gr.top_block, Qt.QWidget):
             exit()
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("GNU Radio", "loopback_codec2")
-        self.settings.setValue("geometry", self.saveGeometry())
+        # self.settings = Qt.QSettings("GNU Radio", "loopback_codec2")
+        # self.settings.setValue("geometry", self.saveGeometry())
         self.stop()
         self.wait()
 
@@ -249,24 +249,28 @@ def main(argv, top_block_cls=loopback_codec2, options=None):
         else: decoded = args[2]
         tb = top_block_cls('d', audio_file=arg, samp_rate=int(args[0]), bit_rate=int(args[1]), output_filename=decoded)
 
-    tb.start()
+    
+    tb.run()
+    qapp.exit()
+    # tb.start()
 
-    tb.show()
+    # tb.show()
 
-    def sig_handler(sig=None, frame=None):
-        tb.stop()
-        tb.wait()
+    # def sig_handler(sig=None, frame=None):
+    #     tb.stop()
+    #     tb.wait()
 
-        Qt.QApplication.quit()
+    #     Qt.QApplication.quit()
 
-    signal.signal(signal.SIGINT, sig_handler)
-    signal.signal(signal.SIGTERM, sig_handler)
+    # signal.signal(signal.SIGINT, sig_handler)
+    # signal.signal(signal.SIGTERM, sig_handler)
 
-    timer = Qt.QTimer()
-    timer.start(500)
-    timer.timeout.connect(lambda: None)
+    # # timer = Qt.QTimer()
+    # # timer.start(500)
+    # # timer.timeout.connect(lambda: None)
 
-    qapp.exec_()
+    # qapp.exec_()
+    # tb.closeEvent()
 
 if __name__ == '__main__':
     main(sys.argv[1:])

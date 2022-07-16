@@ -51,29 +51,31 @@ class loopback_codec2(gr.top_block):
         self.buf_size = 0
         self.play_encoded = play_encoded = True
 
-        match bit_rate: # for the reasoning behind the following buffer sizes check out https://www.gnuradio.org/doc/doxygen/codec2__encode__sp_8h_source.html
-            case 3200:
-                self.bit_rate_mode = codec2.MODE_3200
-                self.buf_size = 64
-            case 2400:
-                self.bit_rate_mode = codec2.MODE_2400
-                self.buf_size = 48
-            case 1600:
-                self.bit_rate_mode = codec2.MODE_1600
-                self.buf_size = 64
-            case 1400:
-                self.bit_rate_mode = codec2.MODE_1400
-                self.buf_size = 56
-            case 1300:
-                self.bit_rate_mode = codec2.MODE_1300
-                self.buf_size = 52
-            case 1200:
-                self.bit_rate_mode = codec2.MODE_1200
-                self.buf_size = 48
-            case _:
-                print('>>>> bit_rate value is missing or not supported.')
-                print('codec2.py [-e <audiofile.wav> samp_rate bit_rate <encodedfilename>] OR [-d <encodedfilename> samp_rate bit_rate <decodedaudiofile.wav>]')
-                exit()
+        if (bit_rate != 3200) and (bit_rate != 2400) and (bit_rate != 1600) and (bit_rate != 1400) and (bit_rate != 1300) and (bit_rate != 1200):
+            print('>>>> bit_rate value is missing or not supported.')
+            print('codec2.py [-e <audiofile.wav> samp_rate bit_rate <encodedfilename>] OR [-d <encodedfilename> samp_rate bit_rate <decodedaudiofile.wav>]')
+            exit()
+        # KSK need to support python < 3.10.x, so can't use match stmt
+        # For the reasoning behind the following buffer sizes check out https://www.gnuradio.org/doc/doxygen/codec2__encode__sp_8h_source.html
+        if bit_rate == 3200:
+            self.bit_rate_mode = codec2.MODE_3200
+            self.buf_size = int(3200/50)
+        if bit_rate == 2400:
+            self.bit_rate_mode = codec2.MODE_2400
+            self.buf_size = int(2400/50)
+        if bit_rate == 1600:
+            self.bit_rate_mode = codec2.MODE_1600
+            self.buf_size = int(1600/25)
+        if bit_rate == 1400:
+            self.bit_rate_mode = codec2.MODE_1400
+            self.buf_size = int(1400/25)
+        if bit_rate == 1300:
+            self.bit_rate_mode = codec2.MODE_1300
+            self.buf_size = int(1300/25)
+        if bit_rate == 1200:
+            self.bit_rate_mode = codec2.MODE_1200
+            self.buf_size = int(1200/25)
+            
 
         if self.mode == 'd': # decoding mode selected
             import pmt

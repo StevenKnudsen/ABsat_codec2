@@ -26,7 +26,7 @@ There example flows demonstrate how to configure encoding and decoding at two di
 
 Each flow has a Note that provides help to set up for a specific Codec2 rate, which is set using a dropdown menu in the `CODEC2 Audio Encoder` or `CODEC2 Audio Decoder` blocks. Since there is no convenient variable from those blocks that can be used to determine the CODEC2 block size, we must set our own variables,
    * `codec2_rate`, which is the bps value set in the `CODEC2 Audio xxx` block
-   * `codec2_rate_scale`, which is a divisor used to determine the CODEC2 block size
+   * `codec2_rate_scale`, which is a divisor used to determine the CODEC2 block size in bits
       * it is 50 for rates 3200 and 2400 bps
       * it is 25 for rates 1600, 1400, 1300, and 1200 bps
       
@@ -47,7 +47,7 @@ Codec2 was developed to support compression of audio data for wireless packet da
 
 Codec2 is resilient to bit errors. You can check this by editing the `.dat` file resulting from encoding and then using the changed file as input to the decoding GRC flow. Do not change the file length, just replace random bytes with new values. 
 
-Codec2 is not tolerant of incorrect block lengths. For example, for the bit rate of 2400 bps, the block length is 48 (see above; 2400/50 = 48 bytes). Files encoded using this software comprise concatenated blocks of 48 bytes. If, for example, we remove the first byte from the file, the decoding operation does not work since each group of 48 bytes in the file is off by 1 byte (i.e., contains the first byte of the next block).
+Codec2 is not tolerant of incorrect block lengths. For example, for the bit rate of 2400 bps, the block length is 48 bits (see above; 2400/50 = 48 bits). Files encoded using this software comprise concatenated blocks of 48 bits = 6 bytes. If, for example, we remove the first byte from the file, the decoding operation does not work since each group of 6 bytes in the file is off by 1 byte (i.e., contains the first byte of the next block).
 
 These considerations are important when considering how to transmit Codec2-encoded files. 
 

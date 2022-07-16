@@ -1,0 +1,301 @@
+options:
+  parameters:
+    author: Steven Knudsen
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: University of Alberta 2022
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: NS_codec2_encode_v01
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Codec2 WAV encode
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [16, 12.0]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: codec2_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '1300'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [536, 4.0]
+    rotation: 0
+    state: enabled
+- name: codec2_rate_scale
+  id: variable
+  parameters:
+    comment: ''
+    value: '25'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [536, 68.0]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '48000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 4.0]
+    rotation: 0
+    state: enabled
+- name: scale
+  id: variable
+  parameters:
+    comment: ''
+    value: 2**13
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 4.0]
+    rotation: 0
+    state: enabled
+- name: wav_audio_samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '8000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 4.0]
+    rotation: 0
+    state: enabled
+- name: audio_sink_0
+  id: audio_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    device_name: ''
+    num_inputs: '1'
+    ok_to_block: 'True'
+    samp_rate: '48000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [536, 204.0]
+    rotation: 0
+    state: disabled
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: female_8k_1300.dat
+    type: byte
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [872, 444.0]
+    rotation: 0
+    state: true
+- name: blocks_float_to_short_0
+  id: blocks_float_to_short
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: scale
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [80, 460.0]
+    rotation: 0
+    state: true
+- name: blocks_unpacked_to_packed_xx_0
+  id: blocks_unpacked_to_packed_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    bits_per_chunk: '1'
+    comment: ''
+    endianness: gr.GR_LSB_FIRST
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [656, 452.0]
+    rotation: 0
+    state: true
+- name: blocks_vector_to_stream_0
+  id: blocks_vector_to_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_items: int(codec2_rate/codec2_rate_scale)
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [464, 464.0]
+    rotation: 0
+    state: true
+- name: blocks_wavfile_source_0
+  id: blocks_wavfile_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    file: /home/knud/Development/NorthernSPIRIT_Voices/female_8k.wav
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nchan: '1'
+    repeat: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 316.0]
+    rotation: 180
+    state: true
+- name: note_0
+  id: note
+  parameters:
+    alias: ''
+    comment: 'Enable the top Rational Resampler and Audio Sink to hear the input WAV
+      file.
+
+
+      Note that unless those two blocks are enabled, the encoding will take less
+
+      time than the WAV file duration.  A file 51s long will take < 5s to encode.
+
+
+      Set wave_audio_samp_rate to the input WAV file sample rate.
+
+
+      Set codec2_rate to the rate selected in the CODEC2 Audio Encoder block.
+
+      Set codec2_rate_scale to 50 for rates of 3200 and 2400 bps, to 25 for rates
+
+      1200, 1300, 1400, and 1600.'
+    note: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [680, 4.0]
+    rotation: 0
+    state: true
+- name: rational_resampler_xxx_0
+  id: rational_resampler_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: int(wav_audio_samp_rate/8000)
+    fbw: '.4'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    taps: '[]'
+    type: fff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [80, 300.0]
+    rotation: 180
+    state: true
+- name: rational_resampler_xxx_0_0
+  id: rational_resampler_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: '1'
+    fbw: '.4'
+    interp: int(samp_rate/wav_audio_samp_rate)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    taps: '[]'
+    type: fff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 180.0]
+    rotation: 0
+    state: disabled
+- name: vocoder_codec2_encode_sp_0
+  id: vocoder_codec2_encode_sp
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mode: codec2.MODE_1300
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [240, 460.0]
+    rotation: 0
+    state: true
+
+connections:
+- [blocks_float_to_short_0, '0', vocoder_codec2_encode_sp_0, '0']
+- [blocks_unpacked_to_packed_xx_0, '0', blocks_file_sink_0, '0']
+- [blocks_vector_to_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
+- [blocks_wavfile_source_0, '0', rational_resampler_xxx_0, '0']
+- [blocks_wavfile_source_0, '0', rational_resampler_xxx_0_0, '0']
+- [rational_resampler_xxx_0, '0', blocks_float_to_short_0, '0']
+- [rational_resampler_xxx_0_0, '0', audio_sink_0, '0']
+- [vocoder_codec2_encode_sp_0, '0', blocks_vector_to_stream_0, '0']
+
+metadata:
+  file_format: 1
+  grc_version: 3.9.7.0

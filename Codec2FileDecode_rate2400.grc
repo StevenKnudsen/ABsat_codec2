@@ -117,7 +117,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: male_8k_2400.dat
+    file: missing2.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -197,7 +197,7 @@ blocks:
     bits_per_sample3: FORMAT_VORBIS
     bits_per_sample4: FORMAT_PCM_16
     comment: ''
-    file: decoded_audio.wav
+    file: decoded_audio_2400.wav
     format: FORMAT_WAV
     nchan: '1'
     samp_rate: wav_audio_samp_rate

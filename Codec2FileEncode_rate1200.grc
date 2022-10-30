@@ -37,7 +37,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '2400'
+    value: '1200'
   states:
     bus_sink: false
     bus_source: false
@@ -49,7 +49,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '50'
+    value: '25'
   states:
     bus_sink: false
     bus_source: false
@@ -117,7 +117,7 @@ blocks:
     alias: ''
     append: 'False'
     comment: ''
-    file: male_8k_2400.dat
+    file: male_8k_1200.dat
     type: byte
     unbuffered: 'False'
     vlen: '1'
@@ -197,7 +197,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 348.0]
+    coordinate: [448, 356.0]
     rotation: 180
     state: true
 - name: note_0
@@ -233,10 +233,10 @@ blocks:
   id: note
   parameters:
     alias: ''
-    comment: 'The encoder does its best to pack bits into bytes. For example, at 2400
+    comment: 'The encoder does its best to pack bits into bytes. For example, at 1200
       bps, the encode appears
 
-      to take one 20 ms chunk and outputs 6 bytes. 6*8/2400 = 20 ms.
+      to take two 20 ms chunks and outputs 6 bytes. 6*8/1200 = 40 ms.
 
 
       This means that the decoder is tolerant of missing blocks of 6 bytes as long
@@ -248,7 +248,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [240, 532.0]
+    coordinate: [240, 540.0]
     rotation: 0
     state: true
 - name: rational_resampler_xxx_0_0
@@ -279,7 +279,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    mode: codec2.MODE_2400
+    mode: codec2.MODE_1200
   states:
     bus_sink: false
     bus_source: false

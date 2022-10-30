@@ -117,7 +117,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: female_8k_1300_missing_cw.dat
+    file: OSR_us_000_0061_8k_1300.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -197,7 +197,7 @@ blocks:
     bits_per_sample3: FORMAT_VORBIS
     bits_per_sample4: FORMAT_PCM_16
     comment: ''
-    file: decoded_audio.wav
+    file: decoded_audio_1300.wav
     format: FORMAT_WAV
     nchan: '1'
     samp_rate: wav_audio_samp_rate
@@ -205,7 +205,29 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [768, 324.0]
+    coordinate: [768, 316.0]
+    rotation: 0
+    state: true
+- name: note_0
+  id: note
+  parameters:
+    alias: ''
+    comment: 'The encoder does its best to pack bits into bytes. For example, at 1300
+      bps, the encode appears
+
+      to take two 40 ms chunks and outputs 13 bytes. 13*8/1300 = 80 ms.
+
+
+      This means that the decoder is tolerant of missing blocks of 13 bytes as long
+      as they happen on
+
+      13 byte boundaries.'
+    note: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [104, 444.0]
     rotation: 0
     state: true
 - name: note_0_0
@@ -218,7 +240,7 @@ blocks:
 
       Note that unless those two blocks are enabled, the decoding will take less
 
-      time than the encoded file duration.  A file 51s long will take < 5s to encode.
+      time than the encoded file duration.  A file 51s long will take < 5s to decode.
 
 
       Set wave_audio_samp_rate to the original WAV file (the one that was encoded)
